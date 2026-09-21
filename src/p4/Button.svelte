@@ -4,10 +4,26 @@
   export let dangerous;
   export let text;
 
+  const accent = parseInt(ACCENT_COLOR.substring(1), 16);
+  const accentIsBright =
+    (((accent >> 16) & 255) * 299 + ((accent >> 8) & 255) * 587 + (accent & 255) * 114) / 1000 > 128;
+
   const getColor = () => {
     if (secondary) return '#0FBD8C';
     if (dangerous) return '#FF8C1A';
     return ACCENT_COLOR;
+  };
+
+  const getTextColor = () => {
+    if (secondary || dangerous) {
+      return 'white';
+    }
+
+    if (accentIsBright) {
+      return '#282828'
+    }
+
+    return 'white';
   };
 </script>
 
@@ -48,7 +64,7 @@
   }
 </style>
 
-<button on:click style:background-color={getColor()}>
+<button on:click style:background-color={getColor()} style:color={getTextColor()}>
   <div class="dimmer"></div>
   <div class="text">{text}</div>
 </button>
