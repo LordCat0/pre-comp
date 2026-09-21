@@ -23,6 +23,7 @@
   import {readAsText} from '../common/readers';
   import merge from './merge';
   import DropArea from './DropArea.svelte';
+  import zapIcon from './zap.svg';
   import {APP_NAME} from '../packager/brand';
 
   export let projectData;
@@ -1092,7 +1093,7 @@
 <Section>
   <div class="buttons">
     <div class="button">
-      <Button on:click={pack} text={$_('options.package')} />
+      <Button on:click={pack} text={$_('options.package')} icon={zapIcon} />
     </div>
     <div clas="button">
       <Button on:click={preview} secondary text={$_('options.preview')} />

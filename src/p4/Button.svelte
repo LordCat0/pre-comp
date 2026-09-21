@@ -3,6 +3,7 @@
   export let secondary;
   export let dangerous;
   export let text;
+  export let icon;
 
   const accent = parseInt(ACCENT_COLOR.substring(1), 16);
   const accentIsBright =
@@ -29,6 +30,9 @@
 
 <style>
   button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     font-family: inherit;
     font-size: 14px;
@@ -66,5 +70,8 @@
 
 <button on:click style:background-color={getColor()} style:color={getTextColor()}>
   <div class="dimmer"></div>
+  {#if icon}
+    <img src={icon} alt="" width={18} height={18}>
+  {/if}
   <div class="text">{text}</div>
 </button>
