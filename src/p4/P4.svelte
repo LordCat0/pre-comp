@@ -155,20 +155,24 @@
         />
       </p>
       <p>
-        <ComplexMessage
-          message={$_('p4.description3')}
-          values={{
-            // These placeholders are named this way for legacy reasons.
-            onScratch: {
-              text: $_('p4.description3-on').replace('{brand}', FEEDBACK_PRIMARY.name),
-              href: FEEDBACK_PRIMARY.link
-            },
-            onGitHub: {
-              text: $_('p4.description3-on').replace('{brand}', FEEDBACK_SECONDARY.name),
-              href: FEEDBACK_SECONDARY.link
-            }
-          }}
-        />
+        {#if FEEDBACK_SECONDARY}
+          <ComplexMessage
+            message={$_('p4.description3')}
+            values={{
+              // These placeholders are named this way for legacy reasons.
+              onScratch: {
+                text: $_('p4.description3-on').replace('{brand}', FEEDBACK_PRIMARY.name),
+                href: FEEDBACK_PRIMARY.link
+              },
+              onGitHub: {
+                text: $_('p4.description3-on').replace('{brand}', FEEDBACK_SECONDARY.name),
+                href: FEEDBACK_SECONDARY.link
+              }
+            }}
+          />
+        {:else}
+          <a href={FEEDBACK_PRIMARY.link}>{$_('p4.feedback')}</a>
+        {/if}
       </p>
       <p class="disclaimer">
         {$_('p4.disclaimer')}
