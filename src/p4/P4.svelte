@@ -181,7 +181,7 @@
   </Section>
 
   {#if !isStandalone}
-    <News />
+    <!-- <News /> -->
   {/if}
 
   {#if isSupported}
