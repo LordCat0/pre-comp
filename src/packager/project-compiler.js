@@ -2,6 +2,7 @@ class ProjectCompiler {
   constructor (projectData) {
     this.projectData = projectData;
     this.scripts = [];
+    this.procedures = [];
   }
 
   getScaffoldingURL () {
@@ -65,7 +66,14 @@ class ProjectCompiler {
       const {startingFunction, procedures, executableHat} = compilerResult.value;
 
       const procedureFactories = Object.keys(procedures)
-        .map(code => `${JSON.stringify(code)}: ${procedures[code].toString()}`)
+        .map(code => {
+          const source = procedures[code].toString();
+          let index = this.procedures.indexOf(source);
+          if (index === -1) {
+            index = this.procedures.push(source) - 1;
+          }
+          return `${JSON.stringify(code)}: ${index}`;
+        })
         .join(',');
       this.scripts.push({
         targetName: target.getName(),
@@ -89,6 +97,7 @@ class ProjectCompiler {
         procedures: ${script.procedures},
         executableHat: ${script.executableHat}
       }`)}];
+      const procedureFactories = [${this.procedures.join(',')}];
       vm.runtime.on('RUNTIME_STARTED', () => {
         for (const ext of ${JSON.stringify(this.projectData.extensions)}) {
           vm.extensionManager.loadExtensionIdSync(ext);
@@ -101,6 +110,7 @@ class ProjectCompiler {
             return factory.toString();
           }
         });
+        const compiledProcedureFactories = procedureFactories.map(restore);
 
         for (const script of scripts) {
           const target = vm.runtime.targets.find(item => (
@@ -113,7 +123,7 @@ class ProjectCompiler {
           }
           const procedures = {};
           for (const code of Object.keys(script.procedures)) {
-            procedures[code] = restore(script.procedures[code]);
+            procedures[code] = compiledProcedureFactories[script.procedures[code]];
           }
           target.blocks.cacheCompileResult(script.topBlockId, {
             startingFunction: restore(script.startingFunction),
