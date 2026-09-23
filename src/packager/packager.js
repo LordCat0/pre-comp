@@ -12,6 +12,8 @@ import {OutdatedPackagerError} from '../common/errors';
 import {darken} from './colors';
 import {Adapter} from './adapter';
 import encodeBigString from './encode-big-string';
+import ProjectCompiler from './project-compiler';
+import {minify} from 'terser';
 
 const PROGRESS_LOADED_SCRIPTS = 0.1;
 
@@ -1013,6 +1015,51 @@ cd "$(dirname "$0")"
     return `${this.options.app.windowTitle}.${extension}`;
   }
 
+  removeBlocks (projectData, scripts) {
+    for (const target of projectData.targets) {
+      const targetScripts = scripts.filter(script => (
+        script.targetName === target.name &&
+        script.isStage === target.isStage
+      ));
+
+      // An extension may register its hats only when the packaged player loads it.
+      if (Object.entries(target.blocks).some(([id, block]) => (
+        block.topLevel &&
+        !targetScripts.some(script => script.topBlockId === id) &&
+        (projectData.extensions || []).some(extension => block.opcode.startsWith(extension + '_'))
+      ))) {
+        continue;
+      }
+
+      const originalBlocks = target.blocks;
+      const keptBlocks = Object.create(null);
+      for (const script of targetScripts) {
+        const hat = Object.prototype.hasOwnProperty.call(originalBlocks, script.topBlockId) &&
+          originalBlocks[script.topBlockId];
+        if (!hat) {
+          throw new Error('Missing hat block ' + script.topBlockId);
+        }
+        const keptHat = {...hat, next: null, inputs: {}};
+        keptBlocks[script.topBlockId] = keptHat;
+
+        if (Object.keys(hat.fields || {}).length === 0) {
+          for (const [name, input] of Object.entries(hat.inputs || {})) {
+            if (name.startsWith('SUBSTACK')) {
+              continue;
+            }
+            keptHat.inputs[name] = input;
+            for (const childId of input.slice(1)) {
+              if (typeof childId === 'string' && Object.prototype.hasOwnProperty.call(originalBlocks, childId)) {
+                keptBlocks[childId] = {...originalBlocks[childId], next: null, inputs: {}};
+              }
+            }
+          }
+        }
+      }
+      target.blocks = keptBlocks;
+    }
+  }
+
   async generateGetProjectData () {
     const result = [];
     let getProjectDataFunction = '';
@@ -1020,12 +1067,36 @@ cd "$(dirname "$0")"
     let storageProgressStart;
     let storageProgressEnd;
 
+    this.packagedProjectArrayBuffer = this.project.arrayBuffer;
+    if (this.options.compiler.enabled) {
+      const zip = await (await getJSZip()).loadAsync(this.project.arrayBuffer);
+      const projectData = await zip.file('project.json').async('string');
+      const projectJSON = JSON.parse(projectData);
+
+      const projectCompiler = new ProjectCompiler(projectJSON);
+      await projectCompiler.compileScripts(projectJSON);
+
+      this.removeBlocks(projectJSON, projectCompiler.scripts);
+      zip.file('project.json', JSON.stringify(projectJSON));
+      this.packagedProjectArrayBuffer = await zip.generateAsync({
+        type: 'uint8array',
+        compression: 'DEFLATE'
+      });
+
+      const minifiedScript = await minify(projectCompiler.getScript(), {
+        mangle: {
+          reserved: ['installPrecompiledScripts']
+        }
+      });
+      result.push(`<script id="precomp">${minifiedScript.code}</script>`);
+    }
+
     if (this.options.target === 'html') {
       isZip = this.project.type !== 'blob';
       storageProgressStart = PROGRESS_FETCHED_COMPRESSED;
       storageProgressEnd = PROGRESS_EXTRACTED_COMPRESSED;
 
-      const projectData = new Uint8Array(this.project.arrayBuffer);
+      const projectData = this.packagedProjectArrayBuffer;
 
       // keep this up-to-date with base85.js
       result.push(`
@@ -1687,14 +1758,14 @@ cd "$(dirname "$0")"
     if (this.options.target !== 'html') {
       let zip;
       if (this.project.type === 'sb3' && this.options.target !== 'zip-one-asset') {
-        zip = await (await getJSZip()).loadAsync(this.project.arrayBuffer);
+        zip = await (await getJSZip()).loadAsync(this.packagedProjectArrayBuffer);
         for (const file of Object.keys(zip.files)) {
           zip.files[`assets/${file}`] = zip.files[file];
           delete zip.files[file];
         }
       } else {
         zip = new (await getJSZip());
-        zip.file('project.zip', this.project.arrayBuffer);
+        zip.file('project.zip', this.packagedProjectArrayBuffer);
       }
       zip.file('index.html', html);
       zip.file('script.js', this.script);

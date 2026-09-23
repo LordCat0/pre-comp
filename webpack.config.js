@@ -154,6 +154,11 @@ const makeWebsite = () => ({
   module: {
     rules: [
       {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto'
+      },
+      {
         test: /\.png|\.svg$/i,
         use: isStandalone ? {
           loader: 'url-loader'
@@ -228,6 +233,11 @@ const makeNode = () => ({
   },
   module: {
     rules: [
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto'
+      },
       {
         test: /\.png|\.svg$/i,
         use: 'file-loader'
