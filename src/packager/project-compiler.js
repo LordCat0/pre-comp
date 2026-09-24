@@ -1,3 +1,5 @@
+const cachedScaffolding = {};
+
 class ProjectCompiler {
   constructor (projectData) {
     this.projectData = projectData;
@@ -22,23 +24,19 @@ class ProjectCompiler {
     }
   }
 
-  loadScaffolding () {
-    if ('Scaffolding' in window) {
-      delete window.Scaffolding;
+  async loadScaffolding () {
+    const url = this.getScaffoldingURL();
+    if (cachedScaffolding[url]) {
+      globalThis.Scaffolding = cachedScaffolding[url];
+      return;
     }
 
-    return new Promise(async (resolve, reject) => {
-        const url = this.getScaffoldingURL();
-        await import(/* webpackIgnore: true */ url);
-
-        setTimeout(() => {
-            if ('Scaffolding' in window) {
-              resolve();
-            } else {
-              reject('Scaffolding failed to load in 100ms');
-            }
-        }, 100);
-    });
+    delete globalThis.Scaffolding;
+    await import(/* webpackIgnore: true */ url);
+    if (!globalThis.Scaffolding) {
+      throw new Error('Scaffolding failed to load');
+    }
+    cachedScaffolding[url] = globalThis.Scaffolding;
   }
 
   async compileScripts () {

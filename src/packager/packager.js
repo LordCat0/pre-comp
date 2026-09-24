@@ -14,6 +14,7 @@ import {Adapter} from './adapter';
 import encodeBigString from './encode-big-string';
 import ProjectCompiler from './project-compiler';
 import {minify} from 'terser';
+import {version} from '../../package.json';
 
 const PROGRESS_LOADED_SCRIPTS = 0.1;
 
@@ -1083,12 +1084,8 @@ cd "$(dirname "$0")"
         compression: 'DEFLATE'
       });
 
-      const minifiedScript = await minify(projectCompiler.getScript(), {
-        mangle: {
-          reserved: ['installPrecompiledScripts']
-        }
-      });
-      result.push(`<script id="precomp">${minifiedScript.code}</script>`);
+      const minifiedScript = await minify(projectCompiler.getScript());
+      result.push(`<script id="precomp-${version}">${minifiedScript.code}</script>`);
     }
 
     if (this.options.target === 'html') {
