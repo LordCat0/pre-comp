@@ -1069,24 +1069,22 @@ cd "$(dirname "$0")"
     let storageProgressEnd;
 
     this.packagedProjectArrayBuffer = this.project.arrayBuffer;
-    if (this.options.compiler.enabled) {
-      const zip = await (await getJSZip()).loadAsync(this.project.arrayBuffer);
-      const projectData = await zip.file('project.json').async('string');
-      const projectJSON = JSON.parse(projectData);
+    const zip = await (await getJSZip()).loadAsync(this.project.arrayBuffer);
+    const projectData = await zip.file('project.json').async('string');
+    const projectJSON = JSON.parse(projectData);
 
-      const projectCompiler = new ProjectCompiler(projectJSON);
-      await projectCompiler.compileScripts(projectJSON);
+    const projectCompiler = new ProjectCompiler(projectJSON);
+    await projectCompiler.compileScripts(projectJSON);
 
-      this.removeBlocks(projectJSON, projectCompiler.scripts);
-      zip.file('project.json', JSON.stringify(projectJSON));
-      this.packagedProjectArrayBuffer = await zip.generateAsync({
-        type: 'uint8array',
-        compression: 'DEFLATE'
-      });
+    this.removeBlocks(projectJSON, projectCompiler.scripts);
+    zip.file('project.json', JSON.stringify(projectJSON));
+    this.packagedProjectArrayBuffer = await zip.generateAsync({
+      type: 'uint8array',
+      compression: 'DEFLATE'
+    });
 
-      const minifiedScript = await minify(projectCompiler.getScript());
-      result.push(`<script id="precomp-${version}">${minifiedScript.code}</script>`);
-    }
+    const minifiedScript = await minify(projectCompiler.getScript());
+    result.push(`<script id="precomp-${version}">${minifiedScript.code}</script>`);
 
     if (this.options.target === 'html') {
       isZip = this.project.type !== 'blob';
@@ -1672,7 +1670,7 @@ cd "$(dirname "$0")"
         maxClones: ${this.options.maxClones},
       });
       if (vm.setCompilerOptions) vm.setCompilerOptions({
-        enabled: ${this.options.compiler.enabled},
+        enabled: true,
         warpTimer: ${this.options.compiler.warpTimer}
       });
       if (vm.renderer.setMaxTextureDimension) vm.renderer.setMaxTextureDimension(${this.options.maxTextureDimension});
@@ -1880,7 +1878,6 @@ Packager.DEFAULT_OPTIONS = () => ({
     listColor: '#fc662c'
   },
   compiler: {
-    enabled: true,
     warpTimer: false
   },
   packagedRuntime: true,

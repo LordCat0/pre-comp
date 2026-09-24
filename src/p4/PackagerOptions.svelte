@@ -101,7 +101,6 @@
   ].includes($options.target);
 
   const advancedOptionsInitiallyOpen = (
-    $options.compiler.enabled !== defaultOptions.compiler.enabled ||
     $options.compiler.warpTimer !== defaultOptions.compiler.warpTimer ||
     $options.extensions.length !== 0 ||
     $options.bakeExtensions !== defaultOptions.bakeExtensions ||
@@ -732,13 +731,6 @@
     <details open={advancedOptionsInitiallyOpen}>
       <summary>{$_('options.advancedSummary')}</summary>
 
-      <div class="option">
-        <label>
-          <input type="checkbox" bind:checked={$options.compiler.enabled}>
-          {$_('options.enableCompiler')}
-        </label>
-        <LearnMore slug="disable-compiler" />
-      </div>
       <div class="option">
         <label>
           <input type="checkbox" bind:checked={$options.compiler.warpTimer}>
