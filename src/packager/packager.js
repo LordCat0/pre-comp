@@ -13,6 +13,7 @@ import {darken} from './colors';
 import {Adapter} from './adapter';
 import encodeBigString from './encode-big-string';
 import ProjectCompiler from './project-compiler';
+import {getScaffoldingURL} from './load-scaffolding';
 import {minify} from 'terser';
 import {version} from '../../package.json';
 
@@ -278,11 +279,10 @@ class Packager extends EventTarget {
 
   async loadResources () {
     const texts = [COPYRIGHT_HEADER];
-    if (this.project.analysis.usesMusic) {
-      texts.push(await this.fetchLargeAsset('scaffolding', 'text'));
-    } else {
-      texts.push(await this.fetchLargeAsset('scaffolding-min', 'text'));
-    }
+    texts.push(await Adapter.fetchExtensionScript(getScaffoldingURL(
+      this.project.analysis.platform,
+      this.project.analysis.usesMusic
+    )));
     if (Object.values(this.getAddonOptions()).some((i) => i)) {
       texts.push(await this.fetchLargeAsset('addons', 'text'));
     }
@@ -1072,9 +1072,8 @@ cd "$(dirname "$0")"
     const zip = await (await getJSZip()).loadAsync(this.project.arrayBuffer);
     const projectData = await zip.file('project.json').async('string');
     const projectJSON = JSON.parse(projectData);
-
-    const projectCompiler = new ProjectCompiler(projectJSON);
-    await projectCompiler.compileScripts(projectJSON);
+    const projectCompiler = new ProjectCompiler(JSON.parse(projectData));
+    await projectCompiler.compileScripts();
 
     this.removeBlocks(projectJSON, projectCompiler.scripts);
     zip.file('project.json', JSON.stringify(projectJSON));

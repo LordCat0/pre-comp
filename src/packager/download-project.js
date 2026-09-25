@@ -45,6 +45,7 @@ const analyzeScratch3 = (projectData) => {
   const extensions = projectData.extensionURLs ? Object.values(projectData.extensionURLs) : [];
   return {
     ...unknownAnalysis(),
+    platform: projectData.meta.platform,
     stageVariables,
     stageComments,
     usesMusic,

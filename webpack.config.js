@@ -30,18 +30,15 @@ const getVersion = () => {
 };
 const version = getVersion();
 
-const makeScaffolding = ({full}) => ({
+const makeAddons = () => ({
   ...base,
   devtool: isProduction ? '' : 'source-map',
   output: {
     filename: 'scaffolding/[name].js',
     path: dist
   },
-  entry: full ? {
-    'scaffolding-full': './src/scaffolding/export.js',
+  entry: {
     addons: './src/addons/index.js'
-  } : {
-    'scaffolding-min': './src/scaffolding/export.js'
   },
   resolve: {
     alias: {
@@ -71,7 +68,7 @@ const makeScaffolding = ({full}) => ({
           loader: 'url-loader'
         }]
       },
-      ...(full ? [{
+      {
         test: /\.mp3$/i,
         use: [{
           loader: 'url-loader',
@@ -79,12 +76,7 @@ const makeScaffolding = ({full}) => ({
             esModule: false
           }
         }]
-      }] : [{
-        test: /\.mp3$/i,
-        use: [{
-          loader: path.resolve(__dirname, 'src', 'build', 'noop-loader.js')
-        }]
-      }]),
+      },
       {
         test: /\.css$/i,
         use: [
@@ -117,7 +109,7 @@ const makeScaffolding = ({full}) => ({
   },
   plugins: [
     ...(buildId ? [new AddBuildIDToOutputPlugin(buildId)] : []),
-    ...(process.env.BUNDLE_ANALYZER === (full ? 'scaffolding-full' : 'scaffolding-min') ? [new BundleAnalyzerPlugin()] : [])
+    ...(process.env.BUNDLE_ANALYZER === 'addons' ? [new BundleAnalyzerPlugin()] : [])
   ]
 });
 
@@ -251,8 +243,7 @@ const makeNode = () => ({
 });
 
 module.exports = [
-  makeScaffolding({full: true}),
-  makeScaffolding({full: false}),
+  makeAddons(),
   ...(process.env.BUILD_MODE === 'node' ? [
     makeNode()
   ] : [

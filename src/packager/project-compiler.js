@@ -1,4 +1,4 @@
-const cachedScaffolding = {};
+import {getScaffoldingURL, loadScaffolding} from './load-scaffolding';
 
 class ProjectCompiler {
   constructor (projectData) {
@@ -7,46 +7,20 @@ class ProjectCompiler {
     this.procedures = [];
   }
 
-  getScaffoldingURL () {
-    const platform = this.projectData.meta.platform;
-    if (!platform) {
-      return 'https://packager.turbowarp.org/scaffolding/scaffolding-min.js'
-    }
-
-    switch (platform.name) {
-      // Support packaging more origins by adding more scaffolding URL's.
-      case 'PenguinMod':
-        return 'https://studio.penguinmod.com/PenguinMod-Packager/scaffolding/scaffolding-min.js';
-      case 'NitroBolt':
-        return 'https://packager.nitrobolt.org/scaffolding/scaffolding-min.js';
-      default:
-        return 'https://packager.turbowarp.org/scaffolding/scaffolding-min.js'
-    }
-  }
-
-  async loadScaffolding () {
-    const url = this.getScaffoldingURL();
-    if (cachedScaffolding[url]) {
-      globalThis.Scaffolding = cachedScaffolding[url];
-      return;
-    }
-
-    delete globalThis.Scaffolding;
-    await import(/* webpackIgnore: true */ url);
-    if (!globalThis.Scaffolding) {
-      throw new Error('Scaffolding failed to load');
-    }
-    cachedScaffolding[url] = globalThis.Scaffolding;
-  }
-
   async compileScripts () {
-    await this.loadScaffolding();
+    const scaffoldingURL = getScaffoldingURL(this.projectData.meta.platform, false);
+    await loadScaffolding(scaffoldingURL);
 
     // We can now assume that "Scaffolding" exists on the window object.
     const scaffolding = new globalThis.Scaffolding.Scaffolding();
 
     scaffolding.setup();
     const vm = scaffolding.vm;
+
+    scaffolding.setExtensionSecurityManager({
+      getSandboxMode: () => 'unsandboxed',
+      canLoadExtensionFromProject: () => true
+    });
 
     await scaffolding.loadProject(this.projectData);
 
@@ -100,7 +74,18 @@ class ProjectCompiler {
         for (const ext of ${JSON.stringify(this.projectData.extensions)}) {
           vm.extensionManager.loadExtensionIdSync(ext);
         }
-        const {JSGenerator} = vm.exports.these_broke_before_and_will_break_again();
+        let JSGenerator;
+        if ('JSGenerator' in vm.exports) {
+          JSGenerator = vm.exports.JSGenerator;
+        } else if ('these_broke_before_and_will_break_again' in vm.exports) {
+           JSGenerator = vm.exports.these_broke_before_and_will_break_again().JSGenerator;
+        } else if ('i_will_not_ask_for_help_when_these_break' in vm.exports) {
+          JSGenerator = vm.exports.i_will_not_ask_for_help_when_these_break().JSGenerator; 
+        } else {
+          // give up
+          throw new Error('Failed to extract JSGenerator');  
+        }
+
         const restore = factory => JSGenerator.prototype.compile.call({
           script: {},
           stopScript() {},

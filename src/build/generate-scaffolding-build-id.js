@@ -12,7 +12,6 @@ const getAllFiles = (g) => glob.sync(g, {
 const root = path.join(__dirname, '..', '..');
 const files = [
   __filename,
-  ...getAllFiles('./src/scaffolding/**/*'),
   ...getAllFiles('./src/addons/**/*'),
   ...getAllFiles('./src/common/**/*'),
   path.join(root, 'webpack.config.js'),

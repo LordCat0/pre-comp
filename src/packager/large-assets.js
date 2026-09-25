@@ -86,16 +86,6 @@ export default {
     sha256: 'fd8bc80a97cd880d71113dfc5f81b124b6e212335393db73e3df168c5c546fbc',
     estimatedSize: 3279554,
   },
-  scaffolding: {
-    src: relativeScaffolding('scaffolding-full.js'),
-    estimatedSize: 4564032,
-    useBuildId: true
-  },
-  'scaffolding-min': {
-    src: relativeScaffolding('scaffolding-min.js'),
-    estimatedSize: 2530463,
-    useBuildId: true
-  },
   addons: {
     src: relativeScaffolding('addons.js'),
     estimatedSize: 19931,
