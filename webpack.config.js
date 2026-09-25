@@ -125,6 +125,7 @@ const makeWebsite = () => ({
   devtool: isStandalone ? '' : 'source-map',
   output: {
     filename: isProduction ? 'js/[name].[contenthash].js' : 'js/[name].js',
+    jsonpFunction: 'webpackJsonpPreComp',
     path: dist
   },
   entry: {
