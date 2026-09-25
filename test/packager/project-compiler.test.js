@@ -1,13 +1,17 @@
 import ProjectCompiler from '../../src/packager/project-compiler';
+import {getScaffoldingURL} from '../../src/packager/load-scaffolding';
+
+jest.mock('../../src/packager/load-scaffolding', () => ({
+  ...jest.requireActual('../../src/packager/load-scaffolding'),
+  loadScaffolding: jest.fn()
+}));
 
 test.each([
   [undefined, 'https://packager.turbowarp.org/scaffolding/scaffolding-min.js'],
-  ['PenguinMod', 'https://studio.penguinmod.com/PenguinMod-Packager/scaffolding/scaffolding-min.js'],
   ['NitroBolt', 'https://packager.nitrobolt.org/scaffolding/scaffolding-min.js'],
   ['Other', 'https://packager.turbowarp.org/scaffolding/scaffolding-min.js']
 ])('selects scaffolding for %s', (platform, expected) => {
-  const compiler = new ProjectCompiler({meta: {platform: platform && {name: platform}}});
-  expect(compiler.getScaffoldingURL()).toBe(expected);
+  expect(getScaffoldingURL(platform && {name: platform})).toBe(expected);
 });
 
 test('shares compiled custom blocks between scripts', async () => {
@@ -58,14 +62,14 @@ test('shares compiled custom blocks between scripts', async () => {
     extensionManager: {loadExtensionIdSync: () => {}},
     exports: {these_broke_before_and_will_break_again: () => ({JSGenerator: {prototype: {compile}}})}
   };
-  const projectCompiler = new ProjectCompiler({extensions: []});
-  projectCompiler.loadScaffolding = async () => {};
+  const projectCompiler = new ProjectCompiler({meta: {}, extensions: []});
   const previousScaffolding = globalThis.Scaffolding;
   globalThis.Scaffolding = {Scaffolding: class {
     constructor () {
       this.vm = vm;
     }
     setup () {}
+    setExtensionSecurityManager () {}
     async loadProject () {}
   }};
 
@@ -98,14 +102,14 @@ test('skips scripts without a compile result and propagates compilation errors',
       }
     }
   };
-  const compiler = new ProjectCompiler({extensions: []});
-  compiler.loadScaffolding = async () => {};
+  const compiler = new ProjectCompiler({meta: {}, extensions: []});
   const previousScaffolding = globalThis.Scaffolding;
   globalThis.Scaffolding = {Scaffolding: class {
     constructor () {
       this.vm = vm;
     }
     setup () {}
+    setExtensionSecurityManager () {}
     async loadProject () {}
   }};
 

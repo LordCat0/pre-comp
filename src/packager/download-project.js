@@ -94,7 +94,9 @@ const mutateScratch3InPlace = (projectData) => {
   // Order matters -- check for implied cloud variables before disabling some of them.
   makeImpliedCloudVariables(projectData);
   disableNonsenseCloudVariables(projectData);
+  const analysis = analyzeScratch3(projectData);
   optimizeSb3Json(projectData);
+  return analysis;
 };
 
 export const downloadProject = async (projectData, progressCallback = () => {}, signal) => {
@@ -109,8 +111,7 @@ export const downloadProject = async (projectData, progressCallback = () => {}, 
 
     processJSON(type, projectData) {
       if (type === 'sb3') {
-        mutateScratch3InPlace(projectData);
-        analysis = analyzeScratch3(projectData);
+        analysis = mutateScratch3InPlace(projectData);
         return projectData;
       }
       if (type === 'sb2') {
