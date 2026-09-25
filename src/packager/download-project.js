@@ -1,5 +1,7 @@
 import optimizeSb3Json from './minify/sb3';
 import {downloadProjectFromBuffer} from '@turbowarp/sbdl';
+import {UnsupportedPlatformError} from '../common/errors';
+import {SUPPORTED_PLATFORMS} from '../config';
 
 const unknownAnalysis = () => ({
   stageVariables: [],
@@ -125,5 +127,8 @@ export const downloadProject = async (projectData, progressCallback = () => {}, 
     project.type = 'blob';
   }
   project.analysis = analysis;
+  if (analysis.platform && !SUPPORTED_PLATFORMS.includes(analysis.platform.name)) {
+    throw new UnsupportedPlatformError(analysis.platform.name);
+  }
   return project;
 };

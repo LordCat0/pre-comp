@@ -1,7 +1,8 @@
 <script>
   import Section from './Section.svelte';
   import Button from './Button.svelte';
-  import {CannotAccessProjectError, OutdatedPackagerError, UnknownNetworkError, UserError} from '../common/errors';
+  import {CannotAccessProjectError, OutdatedPackagerError, UnknownNetworkError, UnsupportedPlatformError, UserError} from '../common/errors';
+  import {SUPPORTED_PLATFORMS} from '../config';
   import {error} from './stores';
   import {FEEDBACK_PRIMARY} from '../packager/brand';
   import {_} from '../locales/';
@@ -136,6 +137,26 @@
         </p>
         <p>
           {$_('p4.cannotAccessProjectCaching')}
+        </p>
+        <p>
+          <Button on:click={closeModal} text={$_('p4.close')} />
+        </p>
+      {:else if $error instanceof UnsupportedPlatformError}
+        <p>
+          <ComplexMessage
+            message={$_('p4.unsupportedPlatform')}
+            values={{
+              platform: {text: $error.platform},
+            }}
+          />
+        </p>
+        <p>
+          <ComplexMessage
+            message={$_('p4.currentlySupportedPlatforms')}
+            values={{
+              supportedPlatforms: {text: SUPPORTED_PLATFORMS.join(', ')}
+            }}
+          />
         </p>
         <p>
           <Button on:click={closeModal} text={$_('p4.close')} />

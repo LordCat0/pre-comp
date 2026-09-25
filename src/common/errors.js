@@ -59,3 +59,14 @@ export class CannotAccessProjectError extends Error {
     this.name = 'CannotAccessProjectError';
   }
 }
+
+/**
+ * Error indicating a project cannot be packaged as it uses an unsupported platform.
+ */
+export class UnsupportedPlatformError extends Error {
+  constructor (platform) {
+    super(`Unsupported platform: ${platform}`);
+    this.name = 'UnsupportedPlatformError';
+    this.platform = platform;
+  }
+}

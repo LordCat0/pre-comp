@@ -41,6 +41,14 @@
       "string": "If the project was shared recently, it may take a few minutes for this message to go away.",
       "developer_comment": "Part of the error modal when loading an unshared project."
     },
+    "unsupportedPlatform": {
+      "string": "This project was made with {platform}, which this packager doesn't support.",
+      "developer_comment": "Error shown when loading a project from an unsupported platform. {platform} is the project's platform name."
+    },
+    "currentlySupportedPlatforms": {
+      "string": "Currently supported platforms: {supportedPlatforms}.",
+      "developer_comment": "Shows which platforms can be packaged. Located in unsupportedPlatform modal."
+    },
     "close": {
       "string": "Close"
     },
