@@ -42,7 +42,7 @@ for (const el of Array.from(document.querySelectorAll('script[type="p4-standalon
 
 let newContent = indexContent;
 if (faviconData) {
-  newContent = newContent.replace(/<\/head>/, `<link rel="shortcut icon" href="data:image/vnd.microsoft.icon;base64,${faviconData.toString('base64')}"></head>`);
+  newContent = newContent.replace('href="favicon.ico"', `href="data:image/vnd.microsoft.icon;base64,${faviconData.toString('base64')}"`);
 }
 newContent = newContent.replace(/<script src=".*"><\/script>/, () => (
   `${standaloneJS}<script>${makeSafeForInlineScript(jsContent)}</script>`
