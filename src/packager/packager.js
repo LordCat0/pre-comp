@@ -36,6 +36,7 @@ const removeUnnecessaryEmptyLines = (string) => string.split('\n')
   .join('\n');
 
 export const getJSZip = async () => (await import(/* webpackChunkName: "jszip" */ '@turbowarp/jszip')).default;
+const getJSObfuscator = async () => (await import(/* webpackChunkName: "javascript-obfuscator" */ 'javascript-obfuscator')).default;
 
 const setFileFast = (zip, path, data) => {
   zip.files[path] = data;
@@ -1083,7 +1084,19 @@ cd "$(dirname "$0")"
     });
 
     const minifiedScript = await minify(projectCompiler.getScript());
-    result.push(`<script id="precomp-${version}">${minifiedScript.code}</script>`);
+    let precompiledScript = minifiedScript.code;
+
+    if (this.options.compiler.obfuscate) {
+      const JavaScriptObfuscator = await getJSObfuscator();
+      precompiledScript = JavaScriptObfuscator.obfuscate(precompiledScript, {
+        target: 'browser',
+        optionsPreset: 'low-obfuscation',
+        stringArrayThreshold: 0.1,
+        disableConsoleOutput: false
+      }).getObfuscatedCode();
+    }
+
+    result.push(`<script id="precomp-${version}">${precompiledScript}</script>`);
 
     if (this.options.target === 'html') {
       isZip = this.project.type !== 'blob';
@@ -1877,7 +1890,8 @@ Packager.DEFAULT_OPTIONS = () => ({
     listColor: '#fc662c'
   },
   compiler: {
-    warpTimer: false
+    warpTimer: false,
+    obfuscate: false
   },
   packagedRuntime: true,
   target: 'html',

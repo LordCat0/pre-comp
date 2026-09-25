@@ -415,6 +415,9 @@
     "warpTimer": {
       "string": "Warp Timer"
     },
+    "obfuscatePrecompiledJS": {
+      "string": "Obfuscate precompiled JavaScript (slower packaging and runtime)"
+    },
     "projectId": {
       "string": "Project ID"
     },

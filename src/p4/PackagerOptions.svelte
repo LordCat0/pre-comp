@@ -102,6 +102,7 @@
 
   const advancedOptionsInitiallyOpen = (
     $options.compiler.warpTimer !== defaultOptions.compiler.warpTimer ||
+    $options.compiler.obfuscate !== defaultOptions.compiler.obfuscate ||
     $options.extensions.length !== 0 ||
     $options.bakeExtensions !== defaultOptions.bakeExtensions ||
     $options.custom.css !== '' ||
@@ -737,6 +738,13 @@
           {$_('options.warpTimer')}
         </label>
         <LearnMore slug="warp-timer" />
+      </div>
+
+      <div class="option">
+        <label>
+          <input type="checkbox" bind:checked={$options.compiler.obfuscate}>
+          {$_('options.obfuscatePrecompiledJS')}
+        </label>
       </div>
 
       <!-- Ignore because CustomExtensions will have a <textarea> inside it -->
