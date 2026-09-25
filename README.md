@@ -1,8 +1,8 @@
-# TurboWarp Packager
+# Pre-comp Packager
 
-https://packager.turbowarp.org/
+https://lordcat0.github.io/pre-comp/
 
-Converts Scratch projects into HTML files, zip archives, or executable programs for Windows, macOS, and Linux.
+Precompiles Scratch projects into JavaScript, then packages them as HTML files, zip archives, or executable programs for Windows, macOS, and Linux.
 
 ## Development
 

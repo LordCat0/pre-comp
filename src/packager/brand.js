@@ -31,8 +31,7 @@ If this is set to an empty string, the link is removed.
 
 module.exports = {
   APP_NAME: 'Pre-comp Packager',
-  // pre-comp: temporary
-  WEBSITE: 'https://example.com/',
+  WEBSITE: 'https://lordcat0.github.io/pre-comp/',
   COPYRIGHT_NOTICE: `Copyright (C) 2021-2024 LordCat0
 
 The Source Code Form of this program is available under the terms of the
